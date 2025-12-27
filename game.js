@@ -10,57 +10,50 @@ const MiniBossSound = new Audio("assets/mini-boss.mp3");
 const PunchSound = new Audio("assets/Punch.mp3");
 const SwordSound = new Audio("assets/Sword.mp3");
 
-// play BGM on first click
-document.addEventListener("click", () => {
-    if(BGM.paused) BGM.play();
-}, {once:true});
+document.addEventListener("click", () => { if(BGM.paused) BGM.play(); }, {once:true});
 
 // ===== MAP =====
 const mapImg = new Image();
 mapImg.src = "assets/map.png";
-const mapWidth = 800;   // sesuai ukuran map.png
-const mapHeight = 400;
+const mapWidth = 1600;   // sesuai map.png
+const mapHeight = 1200;
 
 // ===== PLAYER =====
 const player = {
     x: 100,
     y: 100,
-    size: 50,
-    speed: 3,
+    size: 64,
+    speed: 4,
     hp: 100,
     isAttacking: false
 };
 
 // ===== PLAYER SPRITES =====
-const playerIdleImg = new Image();
-playerIdleImg.src = "assets/player/player_idle.png";
-const playerRunImg = new Image();
-playerRunImg.src = "assets/player/player_run.png";
-const playerAttackImg = new Image();
-playerAttackImg.src = "assets/player/player_attack.png";
+const playerIdleImg = new Image(); playerIdleImg.src = "assets/player/player_idle.png";
+const playerRunImg = new Image(); playerRunImg.src = "assets/player/player_run.png";
+const playerAttackImg = new Image(); playerAttackImg.src = "assets/player/player_attack.png";
 let playerFrame = 0;
 let frameCounter = 0;
-const frameSpeed = 5; // kecepatan animasi
+const frameSpeed = 5;
 
 // ===== CAMERA =====
 const camera = { x:0, y:0 };
 
 // ===== ENEMY =====
 const enemyTypes = [
-    { imgSrc:"assets/slime.png", size:30, hp:10, speed:1 },
-    { imgSrc:"assets/goblin.png", size:35, hp:15, speed:1.2 },
-    { imgSrc:"assets/wolf.png", size:40, hp:20, speed:1.5 },
-    { imgSrc:"assets/mini-boss.png", size:50, hp:50, speed:1 },
-    { imgSrc:"assets/boss.png", size:60, hp:100, speed:0.8 }
+    { imgSrc:"assets/slime.png", size:48, hp:10, speed:1 },
+    { imgSrc:"assets/goblin.png", size:56, hp:15, speed:1.2 },
+    { imgSrc:"assets/wolf.png", size:64, hp:20, speed:1.5 },
+    { imgSrc:"assets/mini-boss.png", size:80, hp:50, speed:1 },
+    { imgSrc:"assets/boss.png", size:100, hp:100, speed:0.8 }
 ];
 const enemies = [];
 for(let i=0;i<10;i++){
     const type = enemyTypes[Math.floor(Math.random()*enemyTypes.length)];
-    const img = new Image();
-    img.src = type.imgSrc;
+    const img = new Image(); img.src = type.imgSrc;
     enemies.push({
-        x: 100 + Math.random()*500,
-        y: 100 + Math.random()*300,
+        x: Math.random()*(mapWidth-100),
+        y: Math.random()*(mapHeight-100),
         size: type.size,
         hp: type.hp,
         speed: type.speed,
@@ -72,10 +65,10 @@ for(let i=0;i<10;i++){
 
 // ===== INPUT =====
 const keys = {};
-document.addEventListener("keydown", e => keys[e.key.toLowerCase()]=true);
-document.addEventListener("keyup", e => keys[e.key.toLowerCase()]=false);
+document.addEventListener("keydown", e=>keys[e.key.toLowerCase()]=true);
+document.addEventListener("keyup", e=>keys[e.key.toLowerCase()]=false);
 
-// ===== COLLISION SIMPLE =====
+// ===== COLLISION =====
 function hit(a,b){
     return a.x<a.x+b.size && a.x+a.size>b.x &&
            a.y<a.y+b.size && a.y+a.size>b.y;
@@ -83,7 +76,6 @@ function hit(a,b){
 
 // ===== UPDATE =====
 function update(){
-    // movement
     let nx=player.x, ny=player.y;
     if(keys["w"]) ny-=player.speed;
     if(keys["s"]) ny+=player.speed;
@@ -94,7 +86,7 @@ function update(){
     nx = Math.max(0, Math.min(nx, mapWidth-player.size));
     ny = Math.max(0, Math.min(ny, mapHeight-player.size));
 
-    player.x = nx; player.y = ny;
+    player.x=nx; player.y=ny;
 
     // camera follow
     camera.x = player.x - canvas.width/2 + player.size/2;
@@ -104,13 +96,10 @@ function update(){
     enemies.forEach(e=>{
         let ex = e.x + e.dirX*e.speed;
         let ey = e.y + e.dirY*e.speed;
-        // simple boundary
         if(ex<0 || ex+e.size>mapWidth) e.dirX*=-1; else e.x=ex;
         if(ey<0 || ey+e.size>mapHeight) e.dirY*=-1; else e.y=ey;
 
-        if(hit(player,e)){
-            player.hp -= 0.1;
-        }
+        if(hit(player,e)) player.hp -= 0.2; // hit damage
     });
 }
 
@@ -136,23 +125,30 @@ function drawPlayer(){
     }
 }
 
+function drawUI(){
+    ctx.fillStyle="white";
+    ctx.font="20px Arial";
+    ctx.fillText("HP: ❤️ ".repeat(Math.floor(player.hp/10)), 10, 30);
+
+    enemies.forEach(e=>{
+        ctx.fillText("💀".repeat(Math.ceil(e.hp/5)), e.x-camera.x, e.y-camera.y-10);
+    });
+
+    if(player.isAttacking){
+        ctx.fillText("👊", player.x-camera.x+20, player.y-camera.y-10);
+    }
+}
+
 function draw(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
-    // draw map
     ctx.drawImage(mapImg,-camera.x,-camera.y,mapWidth,mapHeight);
 
-    // draw enemies
     enemies.forEach(e=>{
         ctx.drawImage(e.img,e.x-camera.x,e.y-camera.y,e.size,e.size);
     });
 
-    // draw player
     drawPlayer();
-
-    // UI
-    ctx.fillStyle="white";
-    ctx.font="16px Arial";
-    ctx.fillText("HP: "+Math.floor(player.hp),10,20);
+    drawUI();
 }
 
 // ===== LOOP =====
