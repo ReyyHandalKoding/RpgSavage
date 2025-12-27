@@ -107,4 +107,4 @@ function enemyTurn(){
         log(`${enemy.name} mati!`);
         gainExp(30 + (enemy.boss?50:0));
         lootDrop();
-        spawn
+        spawnEnemy():
