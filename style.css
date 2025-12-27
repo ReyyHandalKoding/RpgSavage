@@ -1,6 +1,55 @@
-body { font-family: monospace; background: #111; color: #eee; padding: 20px; }
-#log { height: 300px; overflow-y: auto; border: 1px solid #555; padding: 10px; margin-bottom: 10px; }
-button { margin: 5px; padding: 10px; background: #222; color: #fff; border: 1px solid #555; cursor: pointer; }
-button:hover { background: #555; }
-#shop { border:1px solid #666; padding: 10px; margin-top:10px; background:#222; }
-#inventory { border:1px solid #666; padding:10px; margin-bottom:10px; background:#222; }
+body {
+    background: transparent;
+    color: white;
+    font-family: monospace;
+}
+#game-container {
+    position: relative;
+    width: 800px;
+    height: 400px;
+    margin: auto;
+    border: 2px solid #fff;
+    overflow: hidden;
+}
+#player, #enemy {
+    position: absolute;
+    width: 128px;
+    height: 128px;
+    background-size: cover;
+}
+#player {
+    left: 50px;
+    bottom: 50px;
+    background-image: url('assets/player_spritesheet.png');
+}
+#enemy {
+    right: 50px;
+    bottom: 50px;
+}
+#log {
+    position: absolute;
+    bottom: 0;
+    left: 200px;
+    width: 580px;
+    height: 120px;
+    overflow-y: auto;
+    background: rgba(0,0,0,0.5);
+    padding: 5px;
+}
+#sidebar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200px;
+    height: 400px;
+    background: rgba(0,0,0,0.5);
+    padding: 5px;
+}
+#buttons {
+    position: absolute;
+    top: 200px;
+    left: 200px;
+}
+button {
+    margin: 3px;
+}
