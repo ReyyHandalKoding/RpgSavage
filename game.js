@@ -215,6 +215,6 @@ function loadGame(){
 // ===================== Initialize =====================
 spawnEnemy();
 updateStats();
-log("DEBUG: Game initialized successfully");
+log("Game Berhasil Dimuat");
 log("🔥 RPG Savage V3 | Dev: Rey | TikTok:@reyysaiko | Note: Tunggu kelanjutan updatenya boss 😏 🔥");
 log("Ini Game buatan Reyy Dan akan terus berkembang Jika anda berkenan Berinvestasi hubungi nomer ini 0851-8508-3991 Terimakasih 🤭👍");
