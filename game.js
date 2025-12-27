@@ -1,113 +1,164 @@
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+// ===== AUDIO =====
+const BGM = new Audio("assets/Backsound.mp3");
+const BossBGM = new Audio("assets/Boss.mp3");
+const HealSound = new Audio("assets/Heal.mp3");
+const MagicSound = new Audio("assets/Magic.mp3");
+const MiniBossSound = new Audio("assets/mini-boss.mp3");
+const PunchSound = new Audio("assets/Punch.mp3");
+const SwordSound = new Audio("assets/Sword.mp3");
+
+// play BGM on first click
+document.addEventListener("click", () => {
+    if(BGM.paused) BGM.play();
+}, {once:true});
+
+// ===== MAP =====
+const mapImg = new Image();
+mapImg.src = "assets/map.png";
+const mapWidth = 800;   // sesuai ukuran map.png
+const mapHeight = 400;
+
+// ===== PLAYER =====
 const player = {
-  hp: 100,
-  mp: 50,
-  level: 1,
-  gold: 0,
-  atk: 10,
-  mag: 15
+    x: 100,
+    y: 100,
+    size: 50,
+    speed: 3,
+    hp: 100,
+    isAttacking: false
 };
 
-let enemy = {};
+// ===== PLAYER SPRITES =====
+const playerIdleImg = new Image();
+playerIdleImg.src = "assets/player/player_idle.png";
+const playerRunImg = new Image();
+playerRunImg.src = "assets/player/player_run.png";
+const playerAttackImg = new Image();
+playerAttackImg.src = "assets/player/player_attack.png";
+let playerFrame = 0;
+let frameCounter = 0;
+const frameSpeed = 5; // kecepatan animasi
 
-const logDiv = document.getElementById("log");
-const playerEl = document.getElementById("player");
-const enemyEl = document.getElementById("enemy");
+// ===== CAMERA =====
+const camera = { x:0, y:0 };
 
-function log(msg) {
-  logDiv.innerHTML += msg + "<br>";
-  logDiv.scrollTop = logDiv.scrollHeight;
+// ===== ENEMY =====
+const enemyTypes = [
+    { imgSrc:"assets/slime.png", size:30, hp:10, speed:1 },
+    { imgSrc:"assets/goblin.png", size:35, hp:15, speed:1.2 },
+    { imgSrc:"assets/wolf.png", size:40, hp:20, speed:1.5 },
+    { imgSrc:"assets/mini-boss.png", size:50, hp:50, speed:1 },
+    { imgSrc:"assets/boss.png", size:60, hp:100, speed:0.8 }
+];
+const enemies = [];
+for(let i=0;i<10;i++){
+    const type = enemyTypes[Math.floor(Math.random()*enemyTypes.length)];
+    const img = new Image();
+    img.src = type.imgSrc;
+    enemies.push({
+        x: 100 + Math.random()*500,
+        y: 100 + Math.random()*300,
+        size: type.size,
+        hp: type.hp,
+        speed: type.speed,
+        dirX: Math.random()<0.5?-1:1,
+        dirY: Math.random()<0.5?-1:1,
+        img: img
+    });
 }
 
-function updateStats() {
-  hp.innerText = player.hp;
-  mp.innerText = player.mp;
-  lvl.innerText = player.level;
-  gold.innerText = player.gold;
+// ===== INPUT =====
+const keys = {};
+document.addEventListener("keydown", e => keys[e.key.toLowerCase()]=true);
+document.addEventListener("keyup", e => keys[e.key.toLowerCase()]=false);
+
+// ===== COLLISION SIMPLE =====
+function hit(a,b){
+    return a.x<a.x+b.size && a.x+a.size>b.x &&
+           a.y<a.y+b.size && a.y+a.size>b.y;
 }
 
-function spawnEnemy() {
-  const enemies = [
-    { name: "Slime", hp: 40, atk: 5, img: "assets/slime.png" },
-    { name: "Goblin", hp: 60, atk: 8, img: "assets/goblin.png" },
-    { name: "Wolf", hp: 80, atk: 10, img: "assets/wolf.png" }
-  ];
+// ===== UPDATE =====
+function update(){
+    // movement
+    let nx=player.x, ny=player.y;
+    if(keys["w"]) ny-=player.speed;
+    if(keys["s"]) ny+=player.speed;
+    if(keys["a"]) nx-=player.speed;
+    if(keys["d"]) nx+=player.speed;
 
-  enemy = enemies[Math.floor(Math.random() * enemies.length)];
-  enemyEl.style.backgroundImage = `url('${enemy.img}')`;
-  log(`👾 ${enemy.name} muncul!`);
+    // simple map collision
+    nx = Math.max(0, Math.min(nx, mapWidth-player.size));
+    ny = Math.max(0, Math.min(ny, mapHeight-player.size));
+
+    player.x = nx; player.y = ny;
+
+    // camera follow
+    camera.x = player.x - canvas.width/2 + player.size/2;
+    camera.y = player.y - canvas.height/2 + player.size/2;
+
+    // enemy movement
+    enemies.forEach(e=>{
+        let ex = e.x + e.dirX*e.speed;
+        let ey = e.y + e.dirY*e.speed;
+        // simple boundary
+        if(ex<0 || ex+e.size>mapWidth) e.dirX*=-1; else e.x=ex;
+        if(ey<0 || ey+e.size>mapHeight) e.dirY*=-1; else e.y=ey;
+
+        if(hit(player,e)){
+            player.hp -= 0.1;
+        }
+    });
 }
 
-function attack() {
-  if (player.hp <= 0) return;
+// ===== DRAW =====
+function drawPlayer(){
+    let sprite;
+    if(player.isAttacking) sprite = playerAttackImg;
+    else if(keys["w"]||keys["a"]||keys["s"]||keys["d"]) sprite = playerRunImg;
+    else sprite = playerIdleImg;
 
-  enemy.hp -= player.atk;
-  animatePlayer();
+    const frameWidth = sprite.width/8;
+    const frameHeight = sprite.height;
 
-  log(`🗡️ Lo nyerang ${enemy.name} (-${player.atk})`);
+    ctx.drawImage(sprite,
+        frameWidth*playerFrame,0,frameWidth,frameHeight,
+        player.x-camera.x, player.y-camera.y, player.size, player.size
+    );
 
-  if (enemy.hp <= 0) {
-    log(`💀 ${enemy.name} mati!`);
-    player.gold += 10;
-    spawnEnemy();
-  } else {
-    enemyTurn();
-  }
-
-  updateStats();
+    frameCounter++;
+    if(frameCounter>=frameSpeed){
+        playerFrame = (playerFrame+1)%8;
+        frameCounter=0;
+    }
 }
 
-function magic() {
-  if (player.mp < 10) {
-    log("❌ MP kurang!");
-    return;
-  }
+function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    // draw map
+    ctx.drawImage(mapImg,-camera.x,-camera.y,mapWidth,mapHeight);
 
-  player.mp -= 10;
-  enemy.hp -= player.mag;
+    // draw enemies
+    enemies.forEach(e=>{
+        ctx.drawImage(e.img,e.x-camera.x,e.y-camera.y,e.size,e.size);
+    });
 
-  log(`🔥 Magic kena ${enemy.name} (-${player.mag})`);
+    // draw player
+    drawPlayer();
 
-  if (enemy.hp <= 0) {
-    log(`💀 ${enemy.name} mati!`);
-    spawnEnemy();
-  } else {
-    enemyTurn();
-  }
-
-  updateStats();
+    // UI
+    ctx.fillStyle="white";
+    ctx.font="16px Arial";
+    ctx.fillText("HP: "+Math.floor(player.hp),10,20);
 }
 
-function heal() {
-  if (player.mp < 10) {
-    log("❌ MP kurang buat heal!");
-    return;
-  }
-
-  player.mp -= 10;
-  player.hp += 20;
-  if (player.hp > 100) player.hp = 100;
-
-  log("💊 HP bertambah");
-  updateStats();
+// ===== LOOP =====
+function loop(){
+    update();
+    draw();
+    requestAnimationFrame(loop);
 }
-
-function enemyTurn() {
-  player.hp -= enemy.atk;
-  log(`👿 ${enemy.name} nyerang (-${enemy.atk})`);
-
-  if (player.hp <= 0) {
-    log("☠️ LO MATI!");
-  }
-}
-
-function animatePlayer() {
-  playerEl.style.transform = "translateX(20px)";
-  setTimeout(() => {
-    playerEl.style.transform = "translateX(0)";
-  }, 200);
-}
-
-/* INIT */
-spawnEnemy();
-updateStats();
-log("🔥 RPG Savage V3 dimulai 🔥");
+loop();
