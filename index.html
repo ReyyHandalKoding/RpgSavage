@@ -2,43 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>RPG Savage V11</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V17 RPG Savage</title>
 <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-
-<div id="overlay">
-  <h1>GAME OVER</h1>
-  <button onclick="respawn()">RESPAWN</button>
-</div>
-
-<div id="game">
-  <div id="camera">
-    <div id="world">
-      <div id="player"></div>
-      <div id="enemy"></div>
-      <div id="npc"></div>
-    </div>
-  </div>
-
-  <div id="ui">
-    ❤️ <span id="hp"></span><br>
-    🔮 <span id="mp"></span><br>
-    ⭐ <span id="lvl"></span><br>
-    🧠 <span id="exp"></span><br>
-
-    <button onclick="attack()">Attack</button>
-    <button onclick="heal()">Heal</button>
-
-    <div id="log"></div>
-  </div>
-</div>
-
-<footer>
-Dev: Rey | TikTok: @reyysaiko | Savage 😏
-</footer>
-
+<canvas id="game" width="800" height="600"></canvas>
 <script src="game.js"></script>
 </body>
 </html>
