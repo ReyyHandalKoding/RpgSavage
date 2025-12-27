@@ -2,99 +2,88 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>RPG Savage V4</title>
+<title>RPG Savage V5</title>
 
 <style>
-/* ===== RESET ===== */
 html, body {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  background: #111;
-  color: #fff;
-  font-family: monospace;
-  overflow: hidden;
+  margin:0; padding:0;
+  width:100%; height:100%;
+  background:#000;
+  color:#fff;
+  font-family:monospace;
+  overflow:hidden;
 }
 
-/* ===== LAYOUT ===== */
 #game {
-  width: 100vw;
-  height: 100vh;
-  display: flex;
+  display:flex;
+  width:100vw;
+  height:100vh;
 }
 
+/* ===== MAP ===== */
 #battle {
-  flex: 2;
-  position: relative;
-  background: linear-gradient(#222, #000);
-  overflow: hidden;
-}
-
-#ui {
-  flex: 1;
-  background: #000;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
+  flex:2;
+  position:relative;
+  background:url("assets/map.png") center/cover no-repeat;
+  overflow:hidden;
 }
 
 /* ===== SPRITES ===== */
 #player, #enemy {
-  width: 128px;
-  height: 128px;
-  position: absolute;
-  bottom: 80px;
-  background-size: cover;
-  image-rendering: pixelated;
+  width:128px;
+  height:128px;
+  position:absolute;
+  bottom:80px;
+  background-size:cover;
+  image-rendering:pixelated;
 }
 
 #player {
-  left: 80px;
-  background: red; /* fallback */
-  background-image: url("assets/player_spritesheet.png");
+  left:80px;
+  background:red; /* fallback */
+  background-image:url("assets/player.png");
 }
 
 #enemy {
-  right: 80px;
-  background: blue; /* fallback */
+  right:80px;
+  background:blue;
 }
 
 /* ===== UI ===== */
-#stats {
-  border-bottom: 1px solid #333;
-  padding-bottom: 10px;
+#ui {
+  flex:1;
+  background:#111;
+  padding:10px;
+  display:flex;
+  flex-direction:column;
 }
 
-#buttons button {
-  width: 100%;
-  margin-top: 6px;
-  padding: 8px;
-  background: #222;
-  color: #fff;
-  border: 1px solid #555;
-  cursor: pointer;
+button {
+  width:100%;
+  margin-top:6px;
+  padding:8px;
+  background:#222;
+  color:white;
+  border:1px solid #555;
+  cursor:pointer;
 }
-
-#buttons button:hover {
-  background: crimson;
-}
+button:hover { background:crimson; }
 
 #log {
-  flex: 1;
-  margin-top: 10px;
-  background: #111;
-  padding: 5px;
-  overflow-y: auto;
-  font-size: 13px;
+  flex:1;
+  background:#000;
+  margin-top:10px;
+  padding:5px;
+  overflow:auto;
+  font-size:13px;
 }
 
 footer {
-  position: fixed;
-  bottom: 6px;
-  right: 10px;
-  font-size: 12px;
-  color: #aaa;
+  position:fixed;
+  bottom:6px;
+  right:10px;
+  font-size:12px;
+  color:#aaa;
 }
 </style>
 </head>
@@ -108,141 +97,133 @@ footer {
   </div>
 
   <div id="ui">
-    <div id="stats">
-      ❤️ HP: <span id="hp"></span><br>
-      🔮 MP: <span id="mp"></span><br>
-      ⭐ LVL: <span id="lvl"></span><br>
-      💰 Gold: <span id="gold"></span>
-    </div>
+    ❤️ HP: <span id="hp"></span><br>
+    🔮 MP: <span id="mp"></span><br>
+    ⭐ LVL: <span id="lvl"></span><br>
+    💰 Gold: <span id="gold"></span><br>
 
-    <div id="buttons">
-      <button onclick="attack()">Attack</button>
-      <button onclick="magic()">Magic</button>
-      <button onclick="heal()">Heal</button>
-    </div>
+    <button onclick="attack()">Attack</button>
+    <button onclick="magic()">Magic</button>
+    <button onclick="heal()">Heal</button>
 
     <div id="log"></div>
   </div>
 </div>
 
 <footer>
-  Dev: Rey | TikTok: @reyysaiko | Tunggu kelanjutan updatenya boss 😏
+Dev: Rey | TikTok: @reyysaiko | Tunggu kelanjutan updatenya boss 😏
 </footer>
 
 <script>
-/* ===== GAME STATE ===== */
-const player = {
-  hp: 100,
-  mp: 50,
-  level: 1,
-  gold: 0,
-  atk: 10,
-  mag: 15
+/* ===== AUDIO (AMAN WALAU FILE GA ADA) ===== */
+const sfx = {
+  attack: new Audio("assets/sword.mp3"),
+  magic: new Audio("assets/magic.mp3"),
+  heal: new Audio("assets/heal.mp3"),
+  bgm: new Audio("assets/backsound.mp3")
 };
+sfx.bgm.loop = true;
+sfx.bgm.volume = 0.3;
+sfx.bgm.play().catch(()=>{});
 
+/* ===== STATE ===== */
+const player = { hp:100, mp:50, level:1, gold:0, atk:12, mag:18 };
 let enemy = {};
-let px = 80;
-let py = 80;
+let px = 80, py = 80;
 
 /* ===== DOM ===== */
 const playerEl = document.getElementById("player");
-const enemyEl = document.getElementById("enemy");
-const logDiv = document.getElementById("log");
+const enemyEl  = document.getElementById("enemy");
+const logDiv   = document.getElementById("log");
 
-const hp = document.getElementById("hp");
-const mp = document.getElementById("mp");
-const lvl = document.getElementById("lvl");
-const gold = document.getElementById("gold");
+const hp=document.getElementById("hp");
+const mp=document.getElementById("mp");
+const lvl=document.getElementById("lvl");
+const gold=document.getElementById("gold");
 
-/* ===== UTIL ===== */
-function log(msg) {
-  logDiv.innerHTML += msg + "<br>";
+function log(t){
+  logDiv.innerHTML += t+"<br>";
   logDiv.scrollTop = logDiv.scrollHeight;
 }
-
-function updateStats() {
-  hp.textContent = player.hp;
-  mp.textContent = player.mp;
-  lvl.textContent = player.level;
-  gold.textContent = player.gold;
+function updateStats(){
+  hp.textContent=player.hp;
+  mp.textContent=player.mp;
+  lvl.textContent=player.level;
+  gold.textContent=player.gold;
 }
 
-/* ===== ENEMY ===== */
-function spawnEnemy() {
-  const list = [
-    { name: "Slime", hp: 40, atk: 5, img: "assets/slime.png" },
-    { name: "Goblin", hp: 70, atk: 8, img: "assets/goblin.png" },
-    { name: "Wolf", hp: 90, atk: 12, img: "assets/wolf.png" }
-  ];
-  enemy = list[Math.floor(Math.random() * list.length)];
-  enemyEl.style.backgroundImage = `url('${enemy.img}')`;
-  log("👾 " + enemy.name + " muncul!");
+/* ===== ENEMY SYSTEM ===== */
+function spawnEnemy(){
+  const r=Math.random();
+  if(r<0.1){
+    enemy={name:"BOSS",hp:300,atk:25,img:"assets/boss.png"};
+    log("💀 BOSS MUNCUL!");
+  }else if(r<0.3){
+    enemy={name:"Mini Boss",hp:150,atk:15,img:"assets/mini-boss.png"};
+    log("😈 MINI BOSS!");
+  }else{
+    enemy={name:"Slime",hp:60,atk:8,img:"assets/slime.png"};
+    log("👾 Slime muncul");
+  }
+  enemyEl.style.backgroundImage=`url('${enemy.img}')`;
 }
 
-/* ===== PLAYER MOVE (WASD) ===== */
-document.addEventListener("keydown", e => {
-  const step = 12;
-  if (e.key === "a") px -= step;
-  if (e.key === "d") px += step;
-  if (e.key === "w") py += step;
-  if (e.key === "s") py -= step;
-
-  if (px < 0) px = 0;
-  if (py < 0) py = 0;
-
-  playerEl.style.left = px + "px";
-  playerEl.style.bottom = py + "px";
+/* ===== MOVE WASD ===== */
+document.addEventListener("keydown",e=>{
+  const s=12;
+  if(e.key==="a") px-=s;
+  if(e.key==="d") px+=s;
+  if(e.key==="w") py+=s;
+  if(e.key==="s") py-=s;
+  if(px<0)px=0; if(py<0)py=0;
+  playerEl.style.left=px+"px";
+  playerEl.style.bottom=py+"px";
 });
 
 /* ===== COMBAT ===== */
-function attack() {
-  enemy.hp -= player.atk;
-  log("🗡️ Attack -" + player.atk);
-  if (enemy.hp <= 0) {
-    log("💀 Musuh mati!");
-    player.gold += 10;
+function attack(){
+  sfx.attack.play().catch(()=>{});
+  enemy.hp-=player.atk;
+  log("🗡️ Attack -"+player.atk);
+  if(enemy.hp<=0){
+    log("💀 Musuh mati");
+    player.gold+=20;
     spawnEnemy();
-  } else {
-    enemyTurn();
-  }
+  }else enemyTurn();
   updateStats();
 }
 
-function magic() {
-  if (player.mp < 10) {
-    log("❌ MP kurang");
-    return;
-  }
-  player.mp -= 10;
-  enemy.hp -= player.mag;
-  log("🔥 Magic -" + player.mag);
-  if (enemy.hp <= 0) spawnEnemy();
+function magic(){
+  if(player.mp<10){log("❌ MP kurang");return;}
+  sfx.magic.play().catch(()=>{});
+  player.mp-=10;
+  enemy.hp-=player.mag;
+  log("🔥 Magic -"+player.mag);
+  if(enemy.hp<=0) spawnEnemy();
   else enemyTurn();
   updateStats();
 }
 
-function heal() {
-  if (player.mp < 10) {
-    log("❌ MP kurang");
-    return;
-  }
-  player.mp -= 10;
-  player.hp += 20;
-  if (player.hp > 100) player.hp = 100;
-  log("💊 Heal +20");
+function heal(){
+  if(player.mp<10){log("❌ MP kurang");return;}
+  sfx.heal.play().catch(()=>{});
+  player.mp-=10;
+  player.hp+=25;
+  if(player.hp>100)player.hp=100;
+  log("💊 Heal +25");
   updateStats();
 }
 
-function enemyTurn() {
-  player.hp -= enemy.atk;
-  log("👿 Musuh nyerang -" + enemy.atk);
-  if (player.hp <= 0) log("☠️ LO MATI");
+function enemyTurn(){
+  player.hp-=enemy.atk;
+  log("👿 Musuh hit -"+enemy.atk);
+  if(player.hp<=0) log("☠️ GAME OVER");
 }
 
 /* ===== INIT ===== */
 spawnEnemy();
 updateStats();
-log("🔥 RPG Savage V4 START 🔥");
+log("🔥 RPG SAVAGE V5 START 🔥");
 </script>
 
 </body>
