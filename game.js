@@ -17,15 +17,17 @@ let inventoryList = document.getElementById("inventory-list");
 
 // ===================== Helper =====================
 function log(msg){
+    console.log(msg); // debug extreme
     logDiv.innerHTML += msg + "<br>";
     logDiv.scrollTop = logDiv.scrollHeight;
 }
 
 function playSfx(src){
     let sfx = new Audio(src);
-    sfx.play();
+    sfx.play().catch(e => console.warn("SFX gagal load:", src));
 }
 
+// ===================== Stats / Inventory =====================
 function updateStats(){
     document.getElementById("player-hp").innerText = player.hp;
     document.getElementById("player-mp").innerText = player.mp;
@@ -66,6 +68,7 @@ function spawnEnemy(){
         enemy = enemies[Math.floor(Math.random()*enemies.length)];
         log(`Musuh baru muncul: ${enemy.name} HP:${enemy.hp}`);
     }
+    console.log("DEBUG: enemy object", enemy); // debug extreme
 }
 
 // ===================== Actions =====================
@@ -81,6 +84,7 @@ function attack(){
         playSfx("assets/punch.mp3");
         log(`Lo menyerang ${enemy.name} dengan tinju ${dmg} damage!`);
     }
+    console.log("DEBUG: Attack dmg", dmg, "Enemy HP now", enemy.hp);
     enemyTurn();
 }
 
@@ -92,6 +96,7 @@ function magic(){
     player.mp -= 10;
     playSfx("assets/magic.mp3");
     log(`Lo pake magic ke ${enemy.name} ${dmg} damage!`);
+    console.log("DEBUG: Magic dmg", dmg, "Enemy HP now", enemy.hp);
     enemyTurn();
 }
 
@@ -104,6 +109,7 @@ function combo(){
     player.mp -= mpCost;
     playSfx("assets/magic.mp3");
     log(`🔥 Combo Level ${player.skills.comboLevel}! ${enemy.name} kena ${dmg} damage! 🔥`);
+    console.log("DEBUG: Combo dmg", dmg, "Enemy HP now", enemy.hp);
     enemyTurn();
 }
 
@@ -113,6 +119,7 @@ function heal(){
     player.hp = Math.min(player.hp + healAmt, 100 + (player.inventory.Armor?50:0));
     playSfx("assets/heal.mp3");
     log(`Lo heal ${healAmt} HP!`);
+    console.log("DEBUG: Heal HP", healAmt, "Player HP now", player.hp);
     enemyTurn();
 }
 
@@ -123,6 +130,7 @@ function useItem(){
         player.inventory.Potion--;
         log(`Lo pake Potion +${healAmt} HP!`);
         updateInventory();
+        console.log("DEBUG: Used Potion, Player HP now", player.hp);
         enemyTurn();
     } else {
         log("Ga ada Potion!");
@@ -142,6 +150,7 @@ function enemyTurn(){
     let dmg = enemy.attack + Math.floor(Math.random()*5);
     player.hp -= dmg;
     log(`${enemy.name} menyerang lo ${dmg} damage!`);
+    console.log("DEBUG: Enemy attack dmg", dmg, "Player HP now", player.hp);
     checkPlayer();
     updateStats();
 }
@@ -160,13 +169,6 @@ function gainExp(exp){
         log("LEVEL UP! Player jadi lebih kuat!");
     }
     updateStats();
-}
-
-function checkPlayer(){
-    if(player.hp <= 0){
-        log("Lo mati bangsat! Game over!");
-        player.hp = 0;
-    }
 }
 
 // ===================== Loot Drop =====================
@@ -213,3 +215,4 @@ function loadGame(){
 // ===================== Initialize =====================
 spawnEnemy();
 updateStats();
+log("DEBUG: Game initialized successfully");
