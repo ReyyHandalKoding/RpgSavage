@@ -2,48 +2,37 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RPG V3 Super Savage</title>
+<title>RPG Savage V3 Visual</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<h1>RPG V3 Super Savage Final!</h1>
-
-<div id="stats">
-  <p>HP: <span id="player-hp">100</span> | MP: <span id="player-mp">50</span> | Level: <span id="player-level">1</span> | EXP: <span id="player-exp">0</span> | Gold: <span id="player-gold">0</span></p>
+<div id="game-container">
+    <div id="player"></div>
+    <div id="enemy"></div>
+    <div id="log"></div>
+    <div id="sidebar">
+        <p>HP: <span id="player-hp"></span></p>
+        <p>MP: <span id="player-mp"></span></p>
+        <p>Level: <span id="player-level"></span></p>
+        <p>EXP: <span id="player-exp"></span></p>
+        <p>Gold: <span id="player-gold"></span></p>
+        <ul id="inventory-list"></ul>
+    </div>
+    <div id="buttons">
+        <button onclick="attack()">Attack</button>
+        <button onclick="magic()">Magic</button>
+        <button onclick="combo()">Combo</button>
+        <button onclick="heal()">Heal</button>
+        <button onclick="useItem()">Use Item</button>
+        <button onclick="openShop()">Shop</button>
+        <button onclick="showCredit()">About</button>
+    </div>
 </div>
 
-<div id="inventory">
-  <h3>Inventory:</h3>
-  <ul id="inventory-list"></ul>
+<div id="credit" style="position:fixed; bottom:5px; right:5px; font-size:12px; color:#fff;">
+    Dev: Rey | TikTok: @reyysaiko | Note: Tunggu kelanjutan updatenya boss 😏
 </div>
-
-<div id="log"></div>
-
-<div id="controls">
-  <button onclick="attack()">Attack</button>
-  <button onclick="magic()">Magic</button>
-  <button onclick="combo()">Skill Combo</button>
-  <button onclick="heal()">Heal</button>
-  <button onclick="useItem()">Use Item</button>
-  <button onclick="openShop()">Shop</button>
-  <button onclick="saveGame()">Save</button>
-  <button onclick="loadGame()">Load</button>
-</div>
-
-<div id="shop" style="display:none;">
-  <h3>Shop Items</h3>
-  <button onclick="buyItem('Potion')">Potion (10 Gold)</button>
-  <button onclick="buyItem('Sword')">Sword (50 Gold)</button>
-  <button onclick="buyItem('Armor')">Armor (50 Gold)</button>
-  <button onclick="closeShop()">Close Shop</button>
-</div>
-
-<audio id="bgm" src="assets/backsound.mp3" loop autoplay></audio>
 
 <script src="game.js"></script>
-  <div id="credit" style="position:fixed; bottom:5px; right:5px; font-size:12px; color:#fff;">
-    Dev: Rey | TikTok: @reyysaiko | Note: Tunggu kelanjutan updatenya boss 😏
-  </div>
 </body>
 </html>
