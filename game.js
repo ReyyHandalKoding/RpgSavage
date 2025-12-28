@@ -1,5 +1,7 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth*0.9;
+canvas.height = window.innerHeight*0.8;
 
 // ===== AUDIO =====
 const BGM = new Audio("assets/Backsound.mp3");
@@ -10,12 +12,12 @@ const MiniBossSound = new Audio("assets/mini-boss.mp3");
 const PunchSound = new Audio("assets/Punch.mp3");
 const SwordSound = new Audio("assets/Sword.mp3");
 
-document.addEventListener("click", () => { if(BGM.paused) BGM.play(); }, {once:true});
+document.addEventListener("click", ()=>{ if(BGM.paused) BGM.play(); }, {once:true});
 
 // ===== MAP =====
 const mapImg = new Image();
 mapImg.src = "assets/map.png";
-const mapWidth = 1600;   // sesuai map.png
+const mapWidth = 2400;  // persegi panjang
 const mapHeight = 1200;
 
 // ===== PLAYER =====
@@ -25,7 +27,12 @@ const player = {
     size: 64,
     speed: 4,
     hp: 100,
-    isAttacking: false
+    mp: 50,
+    level: 1,
+    exp: 0,
+    isAttacking: false,
+    isCasting: false,
+    isHealing: false
 };
 
 // ===== PLAYER SPRITES =====
@@ -47,8 +54,9 @@ const enemyTypes = [
     { imgSrc:"assets/mini-boss.png", size:80, hp:50, speed:1 },
     { imgSrc:"assets/boss.png", size:100, hp:100, speed:0.8 }
 ];
+
 const enemies = [];
-for(let i=0;i<10;i++){
+for(let i=0;i<15;i++){
     const type = enemyTypes[Math.floor(Math.random()*enemyTypes.length)];
     const img = new Image(); img.src = type.imgSrc;
     enemies.push({
@@ -68,6 +76,35 @@ const keys = {};
 document.addEventListener("keydown", e=>keys[e.key.toLowerCase()]=true);
 document.addEventListener("keyup", e=>keys[e.key.toLowerCase()]=false);
 
+// ===== MOBILE BUTTONS =====
+document.getElementById("punch").addEventListener("click", ()=>{
+    player.isAttacking = true;
+    PunchSound.play();
+    setTimeout(()=>player.isAttacking=false, 300);
+});
+document.getElementById("sword").addEventListener("click", ()=>{
+    player.isAttacking = true;
+    SwordSound.play();
+    setTimeout(()=>player.isAttacking=false, 300);
+});
+document.getElementById("magic").addEventListener("click", ()=>{
+    if(player.mp>=10){
+        player.isCasting = true;
+        MagicSound.play();
+        player.mp -= 10;
+        setTimeout(()=>player.isCasting=false, 300);
+    }
+});
+document.getElementById("heal").addEventListener("click", ()=>{
+    if(player.mp>=5){
+        player.isHealing = true;
+        HealSound.play();
+        player.hp = Math.min(player.hp+20, 100);
+        player.mp -=5;
+        setTimeout(()=>player.isHealing=false,300);
+    }
+});
+
 // ===== COLLISION =====
 function hit(a,b){
     return a.x<a.x+b.size && a.x+a.size>b.x &&
@@ -82,31 +119,38 @@ function update(){
     if(keys["a"]) nx-=player.speed;
     if(keys["d"]) nx+=player.speed;
 
-    // simple map collision
+    // collision map
     nx = Math.max(0, Math.min(nx, mapWidth-player.size));
     ny = Math.max(0, Math.min(ny, mapHeight-player.size));
-
-    player.x=nx; player.y=ny;
+    player.x = nx; player.y = ny;
 
     // camera follow
     camera.x = player.x - canvas.width/2 + player.size/2;
     camera.y = player.y - canvas.height/2 + player.size/2;
 
-    // enemy movement
+    // enemy AI simple follow
     enemies.forEach(e=>{
-        let ex = e.x + e.dirX*e.speed;
-        let ey = e.y + e.dirY*e.speed;
-        if(ex<0 || ex+e.size>mapWidth) e.dirX*=-1; else e.x=ex;
-        if(ey<0 || ey+e.size>mapHeight) e.dirY*=-1; else e.y=ey;
+        const dx = player.x - e.x;
+        const dy = player.y - e.y;
+        const dist = Math.sqrt(dx*dx+dy*dy);
+        if(dist<300){ // follow radius
+            e.x += (dx/dist)*e.speed;
+            e.y += (dy/dist)*e.speed;
+        } else { // random patrol
+            let ex = e.x + e.dirX*e.speed;
+            let ey = e.y + e.dirY*e.speed;
+            if(ex<0 || ex+e.size>mapWidth) e.dirX*=-1; else e.x=ex;
+            if(ey<0 || ey+e.size>mapHeight) e.dirY*=-1; else e.y=ey;
+        }
 
-        if(hit(player,e)) player.hp -= 0.2; // hit damage
+        if(hit(player,e)) player.hp -= 0.2;
     });
 }
 
 // ===== DRAW =====
 function drawPlayer(){
     let sprite;
-    if(player.isAttacking) sprite = playerAttackImg;
+    if(player.isAttacking || player.isCasting) sprite = playerAttackImg;
     else if(keys["w"]||keys["a"]||keys["s"]||keys["d"]) sprite = playerRunImg;
     else sprite = playerIdleImg;
 
@@ -128,15 +172,20 @@ function drawPlayer(){
 function drawUI(){
     ctx.fillStyle="white";
     ctx.font="20px Arial";
+
+    // HP / MP bar
     ctx.fillText("HP: ❤️ ".repeat(Math.floor(player.hp/10)), 10, 30);
+    ctx.fillText("MP: ✨ ".repeat(Math.floor(player.mp/10)), 10, 60);
+    ctx.fillText("Level: "+player.level+"  EXP: "+player.exp, 10,90);
 
     enemies.forEach(e=>{
         ctx.fillText("💀".repeat(Math.ceil(e.hp/5)), e.x-camera.x, e.y-camera.y-10);
     });
 
-    if(player.isAttacking){
-        ctx.fillText("👊", player.x-camera.x+20, player.y-camera.y-10);
-    }
+    // Action emoji
+    if(player.isAttacking) ctx.fillText("👊", player.x-camera.x+20, player.y-camera.y-10);
+    if(player.isCasting) ctx.fillText("✨", player.x-camera.x+20, player.y-camera.y-10);
+    if(player.isHealing) ctx.fillText("❤️", player.x-camera.x+20, player.y-camera.y-10);
 }
 
 function draw(){
