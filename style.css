@@ -1,16 +1,46 @@
 body {
     margin:0;
     background:#111;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-    overflow:hidden;
     font-family: Arial, sans-serif;
     color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+    flex-direction: column;
 }
 
 canvas {
     border: 3px solid white;
-    background:#222;
+    background: #222;
+}
+
+/* Virtual joystick placeholder */
+#joystick {
+    position: absolute;
+    bottom: 50px;
+    left: 50px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+}
+
+/* Action buttons mobile right */
+#buttons {
+    position: absolute;
+    bottom: 50px;
+    right: 50px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#buttons button {
+    font-size: 18px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
 }
