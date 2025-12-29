@@ -1,19 +1,18 @@
 body {
   margin: 0;
   overflow: hidden;
-  background: #000;
+  background: linear-gradient(to bottom, #6ec6ff, #1e3c72);
 }
 
 canvas {
   display: block;
   margin: auto;
-  background: #111;
 }
 
 #mobile-controls {
   position: fixed;
-  bottom: 15px;
-  left: 15px;
+  bottom: 16px;
+  left: 16px;
   z-index: 999;
 }
 
@@ -22,5 +21,7 @@ canvas {
   height: 60px;
   margin: 4px;
   font-size: 18px;
-  opacity: 0.8;
+  border-radius: 12px;
+  border: none;
+  opacity: 0.85;
 }
