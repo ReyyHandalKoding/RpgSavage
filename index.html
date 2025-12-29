@@ -1,23 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>V30 RPG Savage Full Max</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>RPG Web</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<canvas id="game"></canvas>
 
-<!-- Virtual joystick -->
-<div id="joystick"></div>
+<canvas id="game" width="800" height="450"></canvas>
 
-<!-- Action buttons -->
-<div id="buttons">
-  <button id="punch">👊 Punch</button>
-  <button id="sword">🗡️ Sword</button>
-  <button id="magic">✨ Magic</button>
-  <button id="heal">❤️ Heal</button>
+<div id="ui">
+  <button onclick="attack('punch')">Punch</button>
+  <button onclick="attack('sword')">Sword</button>
+  <button onclick="attack('magic')">Magic</button>
+  <button onclick="heal()">Heal</button>
+</div>
+
+<div id="joystick">
+  <div id="stick"></div>
 </div>
 
 <script src="game.js"></script>
