@@ -2,18 +2,32 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>RPG Web</title>
+  <title>⚔️ RPG WEB PUNYA REY</title>
+
+  <!-- FONT RPG -->
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Press+Start+2P&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+<div id="game-title">⚔️ SAVAGE RPG ⚔️</div>
+
 <canvas id="game" width="800" height="450"></canvas>
 
 <div id="ui">
-  <button onclick="attack('punch')">Punch</button>
-  <button onclick="attack('sword')">Sword</button>
-  <button onclick="attack('magic')">Magic</button>
-  <button onclick="heal()">Heal</button>
+  <button onclick="attack('punch')">👊 Punch</button>
+  <button onclick="attack('sword')">🗡️ Sword</button>
+  <button onclick="attack('magic')">✨ Magic</button>
+  <button onclick="heal()">💚 Heal</button>
+  <button onclick="toggleShop()">🛒 Shop</button>
+</div>
+
+<div id="shop">
+  <h3>🛒 BLACKSMITH</h3>
+  <button onclick="buySword()">🗡️ Sword +DMG (50G)</button>
+  <button onclick="buyArmor()">🛡️ Armor +HP (50G)</button>
+  <button onclick="toggleShop()">❌ Close</button>
 </div>
 
 <div id="joystick">
