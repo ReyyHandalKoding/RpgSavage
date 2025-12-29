@@ -1,27 +1,26 @@
-body {
-  margin: 0;
-  overflow: hidden;
+html, body {
+  margin:0; padding:0; height:100%; overflow:hidden;
   background: linear-gradient(to bottom, #6ec6ff, #1e3c72);
+  font-family: Arial, sans-serif;
 }
 
-canvas {
-  display: block;
-  margin: auto;
-}
+canvas { display:block; margin:auto; }
 
 #mobile-controls {
-  position: fixed;
-  bottom: 16px;
-  left: 16px;
-  z-index: 999;
+  position: fixed; bottom:16px; left:16px; z-index:999;
 }
 
 #mobile-controls button {
-  width: 60px;
-  height: 60px;
-  margin: 4px;
-  font-size: 18px;
-  border-radius: 12px;
-  border: none;
-  opacity: 0.85;
+  width:60px; height:60px; margin:4px; font-size:18px;
+  border-radius:12px; border:none; opacity:0.85;
 }
+
+#shop {
+  position: fixed; top:16px; right:16px; background: rgba(0,0,0,0.7);
+  color: white; padding:10px; border-radius:12px; z-index:999;
+}
+
+#shop h3 { margin:0 0 8px 0; font-size:18px; text-align:center; }
+.shop-item { display:flex; align-items:center; margin:6px 0; cursor:pointer; }
+.shop-item img { width:40px; height:40px; margin-right:6px; }
+.shop-item span { font-size:14px; }
