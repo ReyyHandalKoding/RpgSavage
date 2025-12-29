@@ -1,7 +1,7 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-/* ===== BASE RESOLUTION & SCALE ===== */
+/* ===== RESIZE CANVAS ===== */
 const BASE_WIDTH=960, BASE_HEIGHT=540;
 let scale=1;
 function resizeCanvas(){
@@ -15,48 +15,34 @@ function resizeCanvas(){
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
-/* ===== WORLD ===== */
-const TILE=64, GROUND_Y=BASE_HEIGHT-TILE*2;
+/* ===== TILE & GROUND ===== */
+const TILE=64;
+const GROUND_Y=BASE_HEIGHT-TILE*2;
 
-/* ===== ASSETS ===== */
-const skyImg=new Image(); skyImg.src="assets/map/sky.png";
-const groundImg=new Image(); groundImg.src="assets/map/ground.png";
+/* ===== LOAD ASSETS ===== */
+const skyImg = new Image(); skyImg.src="assets/map/sky.png";
+const groundImg = new Image(); groundImg.src="assets/map/ground.png";
 
-/* PLAYER SPRITE */
 const playerImg = {
-  idle: new Image(),
-  run: new Image(),
-  attack1: new Image(),
-  attack2: new Image(),
-  magic: new Image(),
-  heal: new Image()
+  idle:new Image(), run:new Image(), attack:new Image()
 };
 playerImg.idle.src="assets/player/player_idle.png";
 playerImg.run.src="assets/player/player_run.png";
-playerImg.attack1.src="assets/player/player_attack1.png";
-playerImg.attack2.src="https://i.imgur.com/0pR1XgF.png"; // URL sementara
-playerImg.magic.src="https://i.imgur.com/YF6bGqX.png";     // URL sementara
-playerImg.heal.src="https://i.imgur.com/jK3Q3hS.png";      // URL sementara
+playerImg.attack.src="assets/player/player_attack.png";
 
-/* ENEMY SPRITE */
-const enemyImg={slime:new Image(), goblin:new Image(), wolf:new Image(), "mini-boss":new Image(), boss:new Image()};
+const enemyImg = {
+  slime:new Image(), goblin:new Image(), wolf:new Image(),
+  "mini-boss":new Image(), boss:new Image()
+};
 enemyImg.slime.src="assets/enemy/slime.png";
 enemyImg.goblin.src="assets/enemy/goblin.png";
 enemyImg.wolf.src="assets/enemy/wolf.png";
 enemyImg["mini-boss"].src="assets/enemy/mini-boss.png";
 enemyImg.boss.src="assets/enemy/boss.png";
 
-/* EFFECTS (dari URL web) */
-const effectsImg={hit:new Image(), magic:new Image(), heal:new Image()};
-effectsImg.hit.src="https://i.imgur.com/abcd123.png";
-effectsImg.magic.src="https://i.imgur.com/magic456.png";
-effectsImg.heal.src="https://i.imgur.com/heal789.png";
-
-/* AUDIO */
-const bgm=new Audio("assets/audio/backsound.mp3"); bgm.loop=true; bgm.volume=0.5; bgm.play();
-const bossBGM=new Audio("assets/audio/boss.mp3"); bossBGM.loop=true;
-const sfx={punch:new Audio("assets/audio/punch.mp3"), sword:new Audio("assets/audio/sword.mp3"),
-magic:new Audio("assets/audio/magic.mp3"), heal:new Audio("assets/audio/heal.mp3"), miniBoss:new Audio("assets/audio/mini-boss.mp3")};
+/* ===== AUDIO ===== */
+const bgm = new Audio("assets/audio/backsound.mp3"); bgm.loop=true; bgm.volume=0.5; bgm.play();
+const sfx={punch:new Audio("assets/audio/punch.mp3"), sword:new Audio("assets/audio/sword.mp3")};
 
 /* ===== INPUT ===== */
 const keys={left:false,right:false,jump:false};
@@ -67,8 +53,6 @@ document.getElementById("right").ontouchend=()=>keys.right=false;
 document.getElementById("jump").ontouchstart=()=>keys.jump=true;
 document.getElementById("jump").ontouchend=()=>keys.jump=false;
 document.getElementById("attack").ontouchstart=()=>doAttack();
-document.getElementById("magic").ontouchstart=()=>doMagic();
-document.getElementById("heal").ontouchstart=()=>doHeal();
 
 /* ===== PLAYER ===== */
 const player={x:200,y:GROUND_Y-64,w:48,h:64,speed:4,velY:0,onGround:false,
@@ -82,7 +66,7 @@ let cameraX=0;
 let enemies=[];
 function createEnemy(type,x){
   const cfg={slime:{native:null,symmetric:true},goblin:{native:"left",symmetric:false},
-  wolf:{native:"left",symmetric:false},"mini-boss":{native:"right",symmetric:false},boss:{native:null,symmetric:true}};
+    wolf:{native:"left",symmetric:false},"mini-boss":{native:"right",symmetric:false},boss:{native:null,symmetric:true}};
   return {type,x,y:GROUND_Y-48,w:48,h:48,hp:30,maxHp:30,facing:cfg[type].native||"left",
     nativeFacing:cfg[type].native,symmetric:cfg[type].symmetric,attackTimer:0};
 }
@@ -90,33 +74,16 @@ enemies.push(createEnemy("goblin",700));
 enemies.push(createEnemy("wolf",900));
 enemies.push(createEnemy("slime",1100));
 
-/* ===== ATTACK / MAGIC / HEAL LOGIC ===== */
+/* ===== ATTACK ===== */
 function doAttack(){
   if(player.isAttacking) return;
   player.isAttacking=true;
-  player.state=player.combo%2===0?"attack1":"attack2";
+  player.state="attack";
   sfx.punch.currentTime=0; sfx.punch.play();
   const range=40;
   player.attackBox={x:player.facing==="right"?player.x+player.w:player.x-range,
     y:player.y+10,w:range,h:player.h-20};
-  setTimeout(()=>{player.isAttacking=false; player.attackBox=null; player.combo++;},250);
-}
-
-function doMagic(){
-  if(player.mp<5) return;
-  player.mp-=5;
-  player.state="magic";
-  sfx.magic.currentTime=0; sfx.magic.play();
-  setTimeout(()=>{player.state="idle";},300);
-}
-
-function doHeal(){
-  if(player.mp<10) return;
-  player.mp-=10;
-  player.state="heal"; player.hp+=20;
-  if(player.hp>100) player.hp=100;
-  sfx.heal.currentTime=0; sfx.heal.play();
-  setTimeout(()=>{player.state="idle";},300);
+  setTimeout(()=>{player.isAttacking=false; player.attackBox=null; player.state="idle";},250);
 }
 
 /* ===== UPDATE PLAYER ===== */
@@ -126,19 +93,22 @@ function updatePlayer(){
   if(keys.jump && player.onGround){player.velY=-12; player.onGround=false;}
   player.velY+=0.6; player.y+=player.velY;
   if(player.y+player.h>=GROUND_Y){player.y=GROUND_Y-player.h; player.velY=0; player.onGround=true;}
-  if(!player.isAttacking && player.state!=="magic" && player.state!=="heal")
-    player.state=(keys.left||keys.right)?"run":"idle";
+  if(!player.isAttacking) player.state=(keys.left||keys.right)?"run":"idle";
   cameraX=player.x-BASE_WIDTH/2; if(cameraX<0) cameraX=0;
 }
 
-/* ===== ENEMY LOGIC ===== */
+/* ===== UPDATE ENEMY ===== */
 function updateEnemyFacing(e){if(e.symmetric) return; e.facing=player.x<e.x?"left":"right";}
 function hit(a,b){return a.x<b.x+b.w && a.x+a.w>b.x && a.y<b.y+b.h && a.y+a.h>b.y;}
 
 /* ===== DRAW ===== */
-function drawSky(){ctx.drawImage(skyImg,-cameraX*0.3,0,BASE_WIDTH*2,BASE_HEIGHT);}
-function drawGround(){for(let y=0;y<2;y++){for(let i=-1;i<40;i++){ctx.drawImage(groundImg,i*TILE-cameraX%TILE,GROUND_Y+y*TILE,TILE,TILE);}}}
-
+function drawSky(){ctx.drawImage(skyImg,-cameraX*0.3,0,BASE_WIDTH*2,GROUND_Y);}
+function drawGround(){
+  const tiles = Math.ceil(BASE_WIDTH / TILE)+2;
+  for(let i=0;i<tiles;i++){
+    ctx.drawImage(groundImg,i*TILE-cameraX%TILE,GROUND_Y,TILE,TILE);
+  }
+}
 function drawPlayer(){
   const img=playerImg[player.state];
   ctx.save();
@@ -146,7 +116,6 @@ function drawPlayer(){
   else ctx.drawImage(img,player.x-cameraX,player.y,player.w,player.h);
   ctx.restore();
 }
-
 function drawEnemies(){
   enemies.forEach(e=>{
     updateEnemyFacing(e);
@@ -162,12 +131,12 @@ function drawEnemies(){
 
     if(player.attackBox && hit(player.attackBox,e)){
       e.hp-=1;
-      ctx.drawImage(effectsImg.hit,e.x-cameraX,e.y-16,16,16);
     }
   });
   enemies=enemies.filter(e=>e.hp>0);
 }
 
+/* ===== HUD ===== */
 function drawHUD(){
   ctx.fillStyle="white"; ctx.font="14px Arial";
   ctx.fillText(`HP: ${player.hp}`,20,30);
@@ -193,7 +162,12 @@ function gameLoop(){
   ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.setTransform(scale,0,0,scale,0,0);
 
-  drawSky(); drawGround(); updatePlayer(); drawEnemies(); drawPlayer(); drawHUD();
+  drawSky();
+  drawGround();
+  updatePlayer();
+  drawEnemies();
+  drawPlayer();
+  drawHUD();
 
   requestAnimationFrame(gameLoop);
 }
