@@ -1,100 +1,89 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-/* ================= AUDIO ================= */
+/* AUDIO */
 const audio = {
   bgm: new Audio("assets/backsound.mp3"),
-  boss: new Audio("assets/boss.mp3"),
-  miniBoss: new Audio("assets/mini-boss.mp3"),
   punch: new Audio("assets/Punch.mp3"),
   sword: new Audio("assets/Sword.mp3"),
   magic: new Audio("assets/magic.mp3"),
-  heal: new Audio("assets/heal.mp3"),
+  heal: new Audio("assets/heal.mp3")
 };
 audio.bgm.loop = true;
 audio.bgm.volume = 0.4;
 audio.bgm.play();
 
-/* ================= SPRITE ================= */
+/* SPRITE */
 const sprite = {
   idle: new Image(),
   run: new Image(),
   attack: new Image()
 };
-sprite.idle.src   = "assets/player/player_idle.png";
-sprite.run.src    = "assets/player/player_run.png";
+sprite.idle.src = "assets/player/player_idle.png";
+sprite.run.src = "assets/player/player_run.png";
 sprite.attack.src = "assets/player/player_attack.png";
 
-/* ================= PLAYER ================= */
+/* PLAYER */
 const PLAYER_SIZE = 64;
 let player = {
   x: 200,
   y: 300,
   speed: 3,
-
   state: "idle",
   frame: 0,
   tick: 0,
   attacking: false,
-
-  level: 1,
-  exp: 0,
-  gold: 0,
-
-  sword: 0,
-  armor: 0,
+  cooldown: 0,
 
   hp: 100,
   maxHp: 100,
   mana: 50,
-  maxMana: 50,
 
+  gold: 0,
+  hasSword: false,
+  armor: 0,
+
+  combo: 0,
   dead: false
 };
 
-/* ================= ENEMY ================= */
-let enemy;
-let killCount = 0;
-const enemyImg = new Image();
-
-function spawnEnemy(type = "slime") {
-  if (type === "slime")
-    return { name:"Slime", hp:60, maxHp:60, dmg:4, scale:0.6, img:"assets/slime.png", gold:15 };
-
-  if (type === "goblin")
-    return { name:"Goblin", hp:90, maxHp:90, dmg:7, scale:0.85, img:"assets/goblin.png", gold:25 };
-
-  if (type === "wolf")
-    return { name:"Wolf", hp:160, maxHp:160, dmg:14, scale:2.5, img:"assets/wolf.png", gold:45 };
-
-  if (type === "mini") {
-    audio.miniBoss.play();
-    return { name:"Mini Boss", hp:300, maxHp:300, dmg:25, scale:3.5, img:"assets/mini-boss.png", gold:120 };
-  }
-
-  audio.bgm.pause();
-  audio.boss.loop = true;
-  audio.boss.play();
-  return { name:"BOSS", hp:900, maxHp:900, dmg:40, scale:7.5, img:"assets/boss.png", gold:500 };
+/* SAVE LOAD */
+function saveGame() {
+  localStorage.setItem("save", JSON.stringify(player));
 }
-enemy = spawnEnemy();
+function loadGame() {
+  const d = localStorage.getItem("save");
+  if (d) player = JSON.parse(d);
+}
+loadGame();
 
-/* ================= INPUT ================= */
+/* ENEMY */
+const enemyImg = new Image();
+let enemy = {
+  x: 520,
+  y: 300,
+  hp: 120,
+  maxHp: 120,
+  dmg: 10,
+  scale: 0.6,
+  img: "assets/slime.png"
+};
+
+/* INPUT */
 const keys = {};
-window.addEventListener("keydown", e => keys[e.key] = true);
-window.addEventListener("keyup", e => keys[e.key] = false);
+onkeydown = e => keys[e.key] = true;
+onkeyup = e => keys[e.key] = false;
 
-/* ================= JOYSTICK ================= */
+/* JOYSTICK */
+let joyX = 0;
 const joystick = document.getElementById("joystick");
 const stick = document.getElementById("stick");
-let joyX = 0;
 
 joystick.ontouchmove = e => {
   const r = joystick.getBoundingClientRect();
   let x = e.touches[0].clientX - r.left - 60;
-  const max = 40;
-  x = Math.max(-max, Math.min(max, x));
-  joyX = x / max;
+  x = Math.max(-40, Math.min(40, x));
+  joyX = x / 40;
   stick.style.left = 35 + x + "px";
 };
 joystick.ontouchend = () => {
@@ -102,124 +91,101 @@ joystick.ontouchend = () => {
   stick.style.left = "35px";
 };
 
-/* ================= LOGIC ================= */
+/* LOGIC */
 function updatePlayer() {
-  if (player.dead || player.attacking) return;
-
-  let moving = false;
-
-  if (keys["a"] || keys["ArrowLeft"] || joyX < -0.2) {
-    player.x -= player.speed;
-    moving = true;
-  }
-  if (keys["d"] || keys["ArrowRight"] || joyX > 0.2) {
-    player.x += player.speed;
-    moving = true;
-  }
-
-  player.state = moving ? "run" : "idle";
-}
-
-function calcDamage(type) {
-  let base = 0;
-  if (type === "punch") base = 5;
-  if (type === "sword") base = 12 + player.sword * 5;
-  if (type === "magic") base = 18;
-  return base + player.level * 2;
-}
-
-function attack(type) {
   if (player.attacking || player.dead) return;
+
+  let move = false;
+  if (keys["a"] || joyX < -0.2) { player.x -= player.speed; move = true; }
+  if (keys["d"] || joyX > 0.2) { player.x += player.speed; move = true; }
+
+  player.state = move ? "run" : "idle";
+}
+
+function distance() {
+  return Math.abs(player.x - enemy.x);
+}
+
+/* ATTACK */
+function attack(type) {
+  if (player.cooldown > 0 || player.dead) return;
+  if (type === "sword" && !player.hasSword) return;
   if (type === "magic" && player.mana < 10) return;
+  if (distance() > 120) return;
+
+  player.attacking = true;
+  player.state = "attack";
+  player.frame = 0;
+  player.cooldown = 40;
+  player.combo++;
 
   if (type === "magic") player.mana -= 10;
   audio[type].currentTime = 0;
   audio[type].play();
 
-  enemy.hp -= calcDamage(type);
-
-  player.attacking = true;
-  player.state = "attack";
-  player.frame = 0;
+  enemy.hp -= 10 + player.combo * 2;
 
   setTimeout(() => {
     player.attacking = false;
     player.state = "idle";
-  }, 400);
+  }, 300);
 
   if (enemy.hp <= 0) {
-    killCount++;
-    player.gold += enemy.gold;
-    player.exp += 40;
-
-    if (killCount === 3) enemy = spawnEnemy("goblin");
-    else if (killCount === 6) enemy = spawnEnemy("wolf");
-    else if (killCount === 10) enemy = spawnEnemy("mini");
-    else if (killCount === 15) enemy = spawnEnemy("boss");
-    else enemy = spawnEnemy("slime");
+    enemy.hp = enemy.maxHp;
+    player.gold += 20;
+    player.combo = 0;
+    saveGame();
   }
 }
 
-/* ================= ENEMY ATTACK ================= */
+/* ENEMY AI */
 let enemyCooldown = 0;
-function enemyAttack() {
-  if (enemyCooldown > 0 || player.dead) return;
+function updateEnemy() {
+  if (enemy.x > player.x + 80) enemy.x -= 1;
+  if (enemy.x < player.x - 80) enemy.x += 1;
 
-  enemyCooldown = 120;
-  const dmg = Math.max(1, enemy.dmg - player.armor * 3);
-  player.hp -= dmg;
-
-  if (player.hp <= 0) {
-    player.hp = 0;
-    player.dead = true;
+  if (distance() < 90 && enemyCooldown <= 0) {
+    enemyCooldown = 80;
+    player.hp -= enemy.dmg;
+    if (player.hp <= 0) player.dead = true;
   }
 }
 
-/* ================= HEAL & SHOP ================= */
+/* SHOP */
+function toggleShop() {
+  const s = document.getElementById("shop");
+  s.style.display = s.style.display === "block" ? "none" : "block";
+}
+function buySword() {
+  if (player.gold >= 50 && !player.hasSword) {
+    player.gold -= 50;
+    player.hasSword = true;
+    saveGame();
+  }
+}
+function buyArmor() {
+  if (player.gold >= 50) {
+    player.gold -= 50;
+    player.maxHp += 20;
+    player.hp += 20;
+    saveGame();
+  }
+}
+
+/* HEAL */
 function heal() {
-  if (player.mana < 15 || player.dead) return;
+  if (player.mana < 15) return;
   audio.heal.play();
   player.mana -= 15;
   player.hp = Math.min(player.maxHp, player.hp + 30);
 }
 
-function toggleShop() {
-  const s = document.getElementById("shop");
-  s.style.display = s.style.display === "block" ? "none" : "block";
-}
-
-function buySword() {
-  if (player.gold >= 50) {
-    player.gold -= 50;
-    player.sword++;
-  }
-}
-
-function buyArmor() {
-  if (player.gold >= 50) {
-    player.gold -= 50;
-    player.armor++;
-    player.maxHp += 20;
-    player.hp += 20;
-  }
-}
-
-/* ================= DRAW ================= */
+/* DRAW */
 function drawPlayer() {
   const img = sprite[player.state];
   const fw = img.width / 8;
-
-  ctx.drawImage(
-    img,
-    fw * player.frame,
-    0,
-    fw,
-    img.height,
-    player.x,
-    player.y,
-    PLAYER_SIZE,
-    PLAYER_SIZE
-  );
+  ctx.drawImage(img, fw * player.frame, 0, fw, img.height,
+    player.x, player.y, PLAYER_SIZE, PLAYER_SIZE);
 
   player.tick++;
   if (player.tick > 6) {
@@ -231,40 +197,37 @@ function drawPlayer() {
 function drawEnemy() {
   enemyImg.src = enemy.img;
   const size = PLAYER_SIZE * enemy.scale;
-
-  ctx.drawImage(enemyImg, 520, 320 - size, size, size);
+  ctx.drawImage(enemyImg, enemy.x, enemy.y - size, size, size);
 
   ctx.fillStyle = "red";
-  ctx.fillRect(520, 280, size, 10);
+  ctx.fillRect(enemy.x, enemy.y - size - 8, size, 6);
   ctx.fillStyle = "lime";
-  ctx.fillRect(520, 280, (enemy.hp / enemy.maxHp) * size, 10);
+  ctx.fillRect(enemy.x, enemy.y - size - 8, (enemy.hp / enemy.maxHp) * size, 6);
 }
 
 function drawUI() {
   ctx.fillStyle = "white";
-  ctx.font = "12px 'Press Start 2P'";
-  ctx.fillText(`LV ${player.level}`, 20, 30);
-  ctx.fillText(`❤️ ${player.hp}/${player.maxHp}`, 20, 50);
-  ctx.fillText(`✨ ${player.mana}/${player.maxMana}`, 20, 70);
-  ctx.fillText(`💰 ${player.gold}`, 20, 90);
+  ctx.fillText(`HP ${player.hp}`, 20, 30);
+  ctx.fillText(`Gold ${player.gold}`, 20, 50);
+  ctx.fillText(`Combo x${player.combo}`, 20, 70);
 
   if (player.dead) {
-    ctx.fillStyle = "red";
     ctx.font = "30px monospace";
     ctx.fillText("GAME OVER", 280, 220);
   }
 }
 
-/* ================= LOOP ================= */
+/* LOOP */
 function loop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   updatePlayer();
+  updateEnemy();
   drawPlayer();
   drawEnemy();
   drawUI();
 
-  enemyAttack();
+  if (player.cooldown > 0) player.cooldown--;
   if (enemyCooldown > 0) enemyCooldown--;
 
   requestAnimationFrame(loop);
