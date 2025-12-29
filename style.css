@@ -1,91 +1,69 @@
-body {
-  margin: 0;
-  background: radial-gradient(circle, #222, #000);
-  color: white;
-  font-family: 'Press Start 2P', monospace;
-  overflow: hidden;
+body{
+  margin:0;
+  background:radial-gradient(circle,#111,#000);
+  color:#fff;
+  font-family:'Press Start 2P',monospace;
+  overflow:hidden;
 }
 
-#title {
-  text-align: center;
-  font-family: 'Cinzel', serif;
-  font-size: 26px;
-  color: gold;
-  padding: 10px;
+/* OVERLAYS */
+#rotate-overlay,#start-audio{
+  position:fixed; inset:0;
+  background:#000; color:#fff;
+  display:none; align-items:center; justify-content:center;
+  z-index:1000; text-align:center; font-size:22px;
 }
 
-#credit {
-  text-align: center;
-  font-size: 10px;
-  color: #aaa;
+/* HEADER */
+#title{
+  text-align:center;
+  font-family:'Cinzel',serif;
+  font-size:22px; color:gold; margin-top:6px;
 }
+#credit{ text-align:center; font-size:10px; color:#aaa; }
 
-canvas {
-  display: block;
-  margin: auto;
-  background: linear-gradient(#333, #111);
-  border: 3px solid #555;
+/* GAME BOX */
+#game-wrapper{
+  position:relative;
+  width:100%; max-width:800px;
+  aspect-ratio:16/9;
+  margin:auto;
+}
+canvas{
+  width:100%; height:100%;
+  display:block;
+  background:linear-gradient(#333,#111);
+  border:3px solid #555;
 }
 
 /* UI */
-#ui {
-  position: fixed;
-  bottom: 10px;
-  right: 10px;
-  display: flex;
-  gap: 6px;
+#ui{
+  position:absolute; right:10px; bottom:10px;
+  display:flex; gap:8px;
+}
+#ui button{
+  width:46px; height:46px;
+  background:#222; color:#fff;
+  border:2px solid #666; border-radius:6px;
+  font-size:18px;
 }
 
-#ui button {
-  width: 48px;
-  height: 48px;
-  background: #222;
-  color: white;
-  border: 2px solid #666;
-  border-radius: 6px;
-  font-size: 18px;
+/* MOBILE MOVE */
+#mobile-move{
+  position:absolute; left:10px; bottom:10px;
+  display:flex; gap:10px;
+}
+#mobile-move button{
+  width:54px; height:54px;
+  background:rgba(255,255,255,.15);
+  border:2px solid #888; color:#fff;
+  border-radius:8px; font-size:22px;
 }
 
 /* SHOP */
-#shop {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #111;
-  border: 3px solid gold;
-  padding: 20px;
-  display: none;
-}
-
-#shop h3 {
-  text-align: center;
-  color: gold;
-}
-
-#shop button {
-  width: 100%;
-  margin-top: 8px;
-  padding: 8px;
-}
-
-/* JOYSTICK */
-#joystick {
-  position: fixed;
-  bottom: 90px;
-  left: 40px;
-  width: 120px;
-  height: 120px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 50%;
-}
-
-#stick {
-  width: 50px;
-  height: 50px;
-  background: rgba(255,255,255,0.6);
-  border-radius: 50%;
-  position: absolute;
-  left: 35px;
-  top: 35px;
+#shop{
+  position:fixed; inset:0; margin:auto;
+  width:260px; height:fit-content;
+  background:#111; border:3px solid gold;
+  padding:20px; display:none; z-index:999;
 }
