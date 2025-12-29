@@ -1,44 +1,47 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <title>Rpg Mini reyzen</title>
+<meta charset="UTF-8">
+<title>ReyZenith RPG</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 
-  <!-- FONT RPG -->
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Press+Start+2P&display=swap" rel="stylesheet">
-
-  <!-- ICON GAME -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-  <link rel="stylesheet" href="style.css" />
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Press+Start+2P&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div id="title">⚔️ Mini Rpg Reyzen ⚔️</div>
+<div id="rotate-overlay"><div>🔄<br>PUTAR HP KE LANDSCAPE</div></div>
+<div id="start-audio">TAP TO START</div>
+
+<div id="title">⚔️ ReyZenith ⚔️</div>
 <div id="credit">Dev : Reyy</div>
 
-<canvas id="game" width="800" height="450"></canvas>
+<div id="game-wrapper">
+  <canvas id="game" width="800" height="450"></canvas>
 
-<!-- UI BUTTON -->
-<div id="ui">
-  <button onclick="attack('punch')"><i class="fa-solid fa-hand-fist"></i></button>
-  <button onclick="attack('sword')"><i class="fa-solid fa-sword"></i></button>
-  <button onclick="attack('magic')"><i class="fa-solid fa-wand-magic"></i></button>
-  <button onclick="heal()"><i class="fa-solid fa-heart"></i></button>
-  <button onclick="toggleShop()"><i class="fa-solid fa-shop"></i></button>
+  <!-- MOBILE MOVE -->
+  <div id="mobile-move">
+    <button id="left">◀</button>
+    <button id="jump">⬆</button>
+    <button id="right">▶</button>
+  </div>
+
+  <!-- SKILLS -->
+  <div id="ui">
+    <button onclick="attack('punch')"><i class="fa-solid fa-hand-fist"></i></button>
+    <button onclick="attack('sword')"><i class="fa-solid fa-katana"></i></button>
+    <button onclick="attack('magic')"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
+    <button onclick="heal()"><i class="fa-solid fa-heart"></i></button>
+    <button onclick="toggleShop()"><i class="fa-solid fa-shop"></i></button>
+  </div>
 </div>
 
-<!-- SHOP -->
 <div id="shop">
   <h3>BLACKSMITH</h3>
-  <button onclick="buySword()">🗡️ Buy Sword (50G)</button>
-  <button onclick="buyArmor()">🛡️ Buy Armor (50G)</button>
+  <button onclick="buySword()">Buy Sword (50G)</button>
+  <button onclick="buyArmor()">Buy Armor (50G)</button>
   <button onclick="toggleShop()">Close</button>
-</div>
-
-<!-- JOYSTICK -->
-<div id="joystick">
-  <div id="stick"></div>
 </div>
 
 <script src="game.js"></script>
