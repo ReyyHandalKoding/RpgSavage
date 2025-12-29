@@ -1,20 +1,44 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>ReyZenith</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>ReyZenith</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <canvas id="gameCanvas"></canvas>
 
+<!-- Mobile controls -->
 <div id="mobile-controls">
   <button id="left">◀</button>
   <button id="right">▶</button>
   <button id="jump">⤒</button>
   <button id="attack">⚔</button>
+  <button id="magic">✨</button>
+  <button id="heal">💖</button>
+</div>
+
+<!-- Shop UI -->
+<div id="shop">
+  <h3>Shop</h3>
+  <div class="shop-item" id="sword">
+    <img src="https://i.imgur.com/MinecraftSword.png">
+    <span>Sword 100G</span>
+  </div>
+  <div class="shop-item" id="magic_book">
+    <img src="https://i.imgur.com/MinecraftBook.png">
+    <span>Magic 200G</span>
+  </div>
+  <div class="shop-item" id="potion">
+    <img src="https://i.imgur.com/MinecraftPotion.png">
+    <span>Potion 50G</span>
+  </div>
+  <div class="shop-item" id="armor">
+    <img src="https://i.imgur.com/MinecraftArmor.png">
+    <span>Armor 150G</span>
+  </div>
 </div>
 
 <script src="game.js"></script>
