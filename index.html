@@ -1,35 +1,42 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>⚔️ RPG WEB PUNYA REY</title>
+  <meta charset="UTF-8" />
+  <title>Rpg Mini reyzen</title>
 
   <!-- FONT RPG -->
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Press+Start+2P&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="style.css">
+  <!-- ICON GAME -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<div id="game-title">⚔️ SAVAGE RPG ⚔️</div>
+<div id="title">⚔️ Mini Rpg Reyzen ⚔️</div>
+<div id="credit">Dev : Reyy</div>
 
 <canvas id="game" width="800" height="450"></canvas>
 
+<!-- UI BUTTON -->
 <div id="ui">
-  <button onclick="attack('punch')">👊 Punch</button>
-  <button onclick="attack('sword')">🗡️ Sword</button>
-  <button onclick="attack('magic')">✨ Magic</button>
-  <button onclick="heal()">💚 Heal</button>
-  <button onclick="toggleShop()">🛒 Shop</button>
+  <button onclick="attack('punch')"><i class="fa-solid fa-hand-fist"></i></button>
+  <button onclick="attack('sword')"><i class="fa-solid fa-sword"></i></button>
+  <button onclick="attack('magic')"><i class="fa-solid fa-wand-magic"></i></button>
+  <button onclick="heal()"><i class="fa-solid fa-heart"></i></button>
+  <button onclick="toggleShop()"><i class="fa-solid fa-shop"></i></button>
 </div>
 
+<!-- SHOP -->
 <div id="shop">
-  <h3>🛒 BLACKSMITH</h3>
-  <button onclick="buySword()">🗡️ Sword +DMG (50G)</button>
-  <button onclick="buyArmor()">🛡️ Armor +HP (50G)</button>
-  <button onclick="toggleShop()">❌ Close</button>
+  <h3>BLACKSMITH</h3>
+  <button onclick="buySword()">🗡️ Buy Sword (50G)</button>
+  <button onclick="buyArmor()">🛡️ Buy Armor (50G)</button>
+  <button onclick="toggleShop()">Close</button>
 </div>
 
+<!-- JOYSTICK -->
 <div id="joystick">
   <div id="stick"></div>
 </div>
