@@ -1,5 +1,5 @@
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
+const canvas=document.getElementById("gameCanvas");
+const ctx=canvas.getContext("2d");
 
 /* ===== RESIZE CANVAS ===== */
 const BASE_WIDTH=960, BASE_HEIGHT=540;
@@ -12,7 +12,7 @@ function resizeCanvas(){
   canvas.style.width=BASE_WIDTH*scale+"px";
   canvas.style.height=BASE_HEIGHT*scale+"px";
 }
-window.addEventListener("resize", resizeCanvas);
+window.addEventListener("resize",resizeCanvas);
 resizeCanvas();
 
 /* ===== TILE & GROUND ===== */
@@ -20,15 +20,15 @@ const TILE=64;
 const GROUND_Y=BASE_HEIGHT-TILE*2;
 
 /* ===== LOAD ASSETS ===== */
-const skyImg = new Image(); skyImg.src="assets/map/sky.png";
-const groundImg = new Image(); groundImg.src="assets/map/ground.png";
+const skyImg=new Image(); skyImg.src="assets/map/sky.png";
+const groundImg=new Image(); groundImg.src="assets/map/ground.png";
 
-const playerImg = { idle:new Image(), run:new Image(), attack:new Image() };
+const playerImg={idle:new Image(),run:new Image(),attack:new Image()};
 playerImg.idle.src="assets/player/player_idle.png";
 playerImg.run.src="assets/player/player_run.png";
 playerImg.attack.src="assets/player/player_attack.png";
 
-const enemyImg = { slime:new Image(), goblin:new Image(), wolf:new Image(), "mini-boss":new Image(), boss:new Image() };
+const enemyImg={slime:new Image(),goblin:new Image(),wolf:new Image(),"mini-boss":new Image(),boss:new Image()};
 enemyImg.slime.src="assets/enemy/slime.png";
 enemyImg.goblin.src="assets/enemy/goblin.png";
 enemyImg.wolf.src="assets/enemy/wolf.png";
@@ -36,7 +36,7 @@ enemyImg["mini-boss"].src="assets/enemy/mini-boss.png";
 enemyImg.boss.src="assets/enemy/boss.png";
 
 /* ===== EFFECTS ===== */
-const effectImg = { magic: new Image(), heal: new Image() };
+const effectImg={magic:new Image(),heal:new Image()};
 effectImg.magic.src="https://i.imgur.com/9Q0r3sB.png";
 effectImg.heal.src="https://i.imgur.com/5lQeV7f.png";
 let activeEffects=[];
@@ -47,14 +47,14 @@ const sfx={punch:new Audio("assets/audio/punch.mp3"), sword:new Audio("assets/au
 
 /* ===== INPUT ===== */
 const keys={left:false,right:false,jump:false};
-const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-const mobileMove = document.getElementById("mobile-move");
-const mobileSkill = document.getElementById("mobile-skill");
-if(!isMobile){ mobileMove.style.display="none"; mobileSkill.style.display="none"; }
+const isMobile=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+const mobileMove=document.getElementById("mobile-move");
+const mobileSkill=document.getElementById("mobile-skill");
+if(isMobile){ mobileMove.style.display="flex"; mobileSkill.style.display="flex"; }
+else{ mobileMove.style.display="none"; mobileSkill.style.display="none"; }
 
 /* ===== PLAYER ===== */
-const player={x:200,y:GROUND_Y-64,w:48,h:64,speed:4,velY:0,onGround:false,
-state:"idle",facing:"right",isAttacking:false,attackBox:null,
+const player={x:200,y:GROUND_Y-64,w:48,h:64,speed:4,velY:0,onGround:false,state:"idle",facing:"right",isAttacking:false,attackBox:null,
 hp:100,mp:50,combo:0,gold:500,level:1,defense:0,hasSword:false};
 
 /* ===== CAMERA ===== */
@@ -64,7 +64,7 @@ let cameraX=0;
 let enemies=[];
 function createEnemy(type,x){
   const cfg={slime:{native:null,symmetric:true},goblin:{native:"left",symmetric:false},
-    wolf:{native:"left",symmetric:false},"mini-boss":{native:"right",symmetric:false},boss:{native:null,symmetric:true}};
+wolf:{native:"left",symmetric:false},"mini-boss":{native:"right",symmetric:false},boss:{native:null,symmetric:true}};
   return {type,x,y:GROUND_Y-48,w:48,h:48,hp:30,maxHp:30,facing:cfg[type].native||"left",
     nativeFacing:cfg[type].native,symmetric:cfg[type].symmetric,attackTimer:0};
 }
@@ -88,20 +88,14 @@ function doAttack(type="punch"){
 
 function useSkill(n){
   if(n===1) doAttack("punch");
-  else if(n===2) { if(player.hasSword) doAttack("sword"); else alert("Belum punya pedang!"); }
+  else if(n===2){ if(player.hasSword) doAttack("sword"); else alert("Belum punya pedang!"); }
   else if(n===3){ const cost=10; if(player.mp>=cost){player.mp-=cost; doAttack("magic");} else alert("MP tidak cukup!"); }
   else if(n===4){ const cost=15; if(player.mp>=cost){player.mp-=cost; player.hp+=30; if(player.hp>100) player.hp=100; sfx.heal.currentTime=0; sfx.heal.play(); spawnEffect("heal",player.x,player.y);} else alert("MP tidak cukup!"); }
 }
 
 /* ===== EFFECT ===== */
 function spawnEffect(type,x,y){ activeEffects.push({type,x,y,frame:0}); }
-function drawEffects(){
-  activeEffects.forEach((e,i)=>{
-    const img=effectImg[e.type];
-    ctx.drawImage(img,e.x-cameraX,e.y-32,64,64);
-    e.frame++; if(e.frame>20) activeEffects.splice(i,1);
-  });
-}
+function drawEffects(){ activeEffects.forEach((e,i)=>{ const img=effectImg[e.type]; ctx.drawImage(img,e.x-cameraX,e.y-32,64,64); e.frame++; if(e.frame>20) activeEffects.splice(i,1); }); }
 
 /* ===== UPDATE PLAYER ===== */
 function updatePlayer(){
@@ -119,14 +113,16 @@ function updateEnemyFacing(e){ if(e.symmetric) return; e.facing=player.x<e.x?"le
 function hit(a,b){return a.x<b.x+b.w && a.x+a.w>b.x && a.y<b.y+b.h && a.y+a.h>b.y;}
 
 /* ===== DRAW ===== */
-function drawSky(){ctx.drawImage(skyImg,-cameraX*0.3,0,BASE_WIDTH*2,GROUND_Y);}
-function drawGround(){ctx.drawImage(groundImg,-cameraX,GROUND_Y,BASE_WIDTH*2,BASE_HEIGHT-GROUND_Y);}
+function drawSky(){ ctx.drawImage(skyImg,-cameraX*0.3,0,skyImg.width,skyImg.height); }
+function drawGround(){ ctx.drawImage(groundImg,-cameraX,GROUND_Y,groundImg.width,groundImg.height); }
+
 function drawPlayer(){
   const img=playerImg[player.state]; ctx.save();
   if(player.facing==="left"){ctx.scale(-1,1); ctx.drawImage(img,-(player.x-cameraX+player.w),player.y,player.w,player.h);}
   else ctx.drawImage(img,player.x-cameraX,player.y,player.w,player.h);
   ctx.restore();
 }
+
 function drawEnemies(){
   enemies.forEach((e,i)=>{
     updateEnemyFacing(e);
@@ -178,7 +174,7 @@ if(isMobile){
 /* ===== PC KEYBOARD ===== */
 document.addEventListener("keydown",e=>{
   if(!isMobile){
-    if(e.key==="w"||e.key==="W") keys.left=true;
+    if(e.key==="a"||e.key==="A") keys.left=true;
     if(e.key==="d"||e.key==="D") keys.right=true;
     if(e.key===" ") keys.jump=true;
     if(e.key==="q"||e.key==="Q") useSkill(1);
@@ -189,7 +185,7 @@ document.addEventListener("keydown",e=>{
 });
 document.addEventListener("keyup",e=>{
   if(!isMobile){
-    if(e.key==="w"||e.key==="W") keys.left=false;
+    if(e.key==="a"||e.key==="A") keys.left=false;
     if(e.key==="d"||e.key==="D") keys.right=false;
     if(e.key===" ") keys.jump=false;
   }
